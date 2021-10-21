@@ -1,3 +1,6 @@
+from settings import WIN_COMBO
+
+
 def print_table(table):
     text = ''
     text += '-' * 13 + '\n'
@@ -11,9 +14,7 @@ def init_table():
     return list(range(1, 10))
 
 
-def check_win(table):
-    lst = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6),
-           (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
+def check_win(table, lst=WIN_COMBO):
     flag = False
     for el in lst:
         if table[el[0]] == table[el[1]] == table[el[2]]:
@@ -26,49 +27,32 @@ def free_cell(table):
 
 
 def win_line(table, find_char='X'):
-    lst = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6),
-           (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
     # найти ячейки занятые соперником
     tmp = []
     dct = {}
     for el in range(len(table)):  # индексы ячеек
         if table[el] == find_char:
             tmp.append(el)
-    # print(tmp)
     # найти попадание значений в эл из списка
-    for el in lst:
+    for el in WIN_COMBO:
         for i in tmp:
             if i in el:
                 dct[el] = dct.get(el, 0) + 1
-    # print(dct)
     dct_sort = sorted(dct.items(), key=lambda x: x[1], reverse=True)
-    # print(dct_sort)
     for el in dct_sort:
-        # print(table[el[0][0]])
         if table[el[0][0]] not in ['X', '0']:
-            # print(el, el[0][0])
             return el[0][0]
         elif table[el[0][1]] not in ['X', '0']:
-            # print(el, el[0][1])
             return el[0][1]
         elif table[el[0][2]] not in ['X', '0']:
             return el[0][2]
 
 
 def comp_step(table):
-    dct = {}
-    lst = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6),
-           (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
     enemy_step = table.count('X')  # посчитать колво ходов соперника
     if enemy_step == 0:
         return 4
     elif enemy_step == 1:  # у соперника 1 ход: выбираем ячейку с большим колвом комбинаций
-        # for i in range(10):
-        #     for el in lst:
-        #         print(i, el)
-        #         if all([i in el, table[el[0]] != 'X', table[el[1]] != 'X', table[el[2]] != 'X']):
-        #             dct[i] = dct.get(i, 0) + 1
-        # return max(dct.items(), key=lambda x: x[1])[0]
         if table[4] == 'X':
             return 0
         else:
@@ -82,18 +66,9 @@ def comp_step(table):
             pass
         else:
             return cell_num + 1
-    #
-    # else:
-    #     pass
-
-    # у соперника 3 хода:
-    #           - проверить свою линию
-    #           - перекрыть линию противника
 
 
-# print(comp_step([0, 1, 2, 3, 'X', 5, 6, 7, 'X']))
-
-def check_answer(questions, lst):
+def check_answer(questions, lst=WIN_COMBO):
     while True:
         answer = input(questions)
         if answer.isdigit():
@@ -104,7 +79,6 @@ def check_answer(questions, lst):
 
 
 def edit_table(table, num, char):
-    # print(__name__, table, num, char)
     table[num-1] = char
     return table
 
@@ -127,19 +101,21 @@ def main():
             if user == 1:
                 answer = check_answer(f'Пользователь {user} ваш ход:', free_cell(table))
             elif user == 2:
+                print('Ход компьютера')
                 answer = comp_step(table)
-                # if answer.isdigit():
-                #     print(__name__, answer)
             if not (answer is None):
                 table = edit_table(table, answer, dct[user])
             if check_win(table) or answer is None:
                 if answer is None:
+                    print(print_table(table))
                     print('Ничья')
                     break
                 elif user == 1:
+                    print(print_table(table))
                     print(f'Пользователь {user} выиграл.')
                     break
                 elif user == 2:
+                    print(print_table(table))
                     print('Компьютер выиграл')
                     break
             if user == 1:
@@ -157,6 +133,7 @@ def main():
             answer = check_answer(f'Пользователь {user} ваш ход:', free_cell(table))
             table = edit_table(table, answer, dct[user])
             if check_win(table):
+                print(print_table(table))
                 print(f'Пользователь {user} выиграл.')
                 if check_answer(f'Еще поиграем? 1-да/2-нет', [1, 2]) == 1:
                     main()
