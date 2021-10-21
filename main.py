@@ -25,6 +25,36 @@ def free_cell(table):
     return [el for el in table if type(el) == int]
 
 
+def win_line(table, find_char='X'):
+    lst = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6),
+           (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
+    # найти ячейки занятые соперником
+    tmp = []
+    dct = {}
+    for el in range(len(table)):  # индексы ячеек
+        if table[el] == find_char:
+            tmp.append(el)
+    # print(tmp)
+    # найти попадание значений в эл из списка
+    for el in lst:
+        for i in tmp:
+            if i in el:
+                dct[el] = dct.get(el, 0) + 1
+    # print(dct)
+    dct_sort = sorted(dct.items(), key=lambda x: x[1], reverse=True)
+    # print(dct_sort)
+    for el in dct_sort:
+        # print(table[el[0][0]])
+        if table[el[0][0]] not in ['X', '0']:
+            # print(el, el[0][0])
+            return el[0][0]
+        elif table[el[0][1]] not in ['X', '0']:
+            # print(el, el[0][1])
+            return el[0][1]
+        elif table[el[0][2]] not in ['X', '0']:
+            return el[0][2]
+
+
 def comp_step(table):
     dct = {}
     lst = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6),
@@ -42,20 +72,26 @@ def comp_step(table):
         if table[4] == 'X':
             return 0
         else:
-            return 4
-    elif enemy_step == 2:  # у соперника 2 хода: перекрываем линию соперника
-        pass
-    else:
-        pass
-
-
+            return 5
+    else:  # у соперника 2 хода: перекрываем линию соперника
+        cell_num = win_line(table, 'X')
+        if cell_num is None:
+            return None
+        if table[cell_num] == '0':
+            # если занята, то составить свою линию
+            pass
+        else:
+            return cell_num + 1
+    #
+    # else:
+    #     pass
 
     # у соперника 3 хода:
     #           - проверить свою линию
     #           - перекрыть линию противника
 
 
-# print(comp_step([1, 'X', 3, 4, 5, 6, 7, 8, 9]))
+# print(comp_step([0, 1, 2, 3, 'X', 5, 6, 7, 'X']))
 
 def check_answer(questions, lst):
     while True:
@@ -68,6 +104,7 @@ def check_answer(questions, lst):
 
 
 def edit_table(table, num, char):
+    # print(__name__, table, num, char)
     table[num-1] = char
     return table
 
@@ -82,9 +119,37 @@ def main():
     answer = check_answer('Выберите вариант игры: ', [1, 2])
 
     if answer == 1:
-        print('В разработке')
+        # user = 1 = 'X'  comp = 2 = '0'
+        user = 1
+        table = init_table()
+        while True:
+            print(print_table(table))
+            if user == 1:
+                answer = check_answer(f'Пользователь {user} ваш ход:', free_cell(table))
+            elif user == 2:
+                answer = comp_step(table)
+                # if answer.isdigit():
+                #     print(__name__, answer)
+            if not (answer is None):
+                table = edit_table(table, answer, dct[user])
+            if check_win(table) or answer is None:
+                if answer is None:
+                    print('Ничья')
+                    break
+                elif user == 1:
+                    print(f'Пользователь {user} выиграл.')
+                    break
+                elif user == 2:
+                    print('Компьютер выиграл')
+                    break
+            if user == 1:
+                user = 2
+            else:
+                user = 1
+        if check_answer(f'Еще поиграем? 1-да/2-нет', [1, 2]) == 1:
+            main()
     else:
-        # user1 = X  user2 = 0
+        # user1 = 'X'  user2 = '0'
         user = 1
         table = init_table()
         while True:
@@ -103,5 +168,5 @@ def main():
                 user = 1
 
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
